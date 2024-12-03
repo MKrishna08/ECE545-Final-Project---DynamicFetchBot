@@ -6,7 +6,8 @@ from motion_tracking import MotionTracker
 from trajectory_prediction import TrajectoryPredictor
 from visualization import Visualizer
 from depth_map import DepthMap
-from single_camera_distance import SingleCameraDistanceEstimator
+#from single_camera_distance import SingleCameraDistanceEstimator
+from single_camera_distance_improved import SingleCameraDistanceEstimator
 
 
 # Initialize components
@@ -16,8 +17,7 @@ tracker = MotionTracker()
 predictor = TrajectoryPredictor()
 visualizer = Visualizer()
 depth_estimator = DepthMap(baseline=0.1, focal_length=700)
-distance_estimator = SingleCameraDistanceEstimator(known_width=0.2, focal_length=800)
-
+distance_estimator = SingleCameraDistanceEstimator(known_width=0.2, verbose= True, focal_length=800)
 
 # Initialize runtime variables
 trail_points = []
