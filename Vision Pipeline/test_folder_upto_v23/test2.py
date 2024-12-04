@@ -5,7 +5,6 @@ from ball_detection_test import BallDetector
 from motion_tracking_test import MotionTracker
 from trajectory_prediction_test import TrajectoryPredictor
 from visualization_test import Visualizer
-from depth_map_test import DepthMap
 from single_camera_distance_test import SingleCameraDistanceEstimator
 
 # Initialize components
@@ -14,7 +13,6 @@ detector = BallDetector(lower_color_range=[40, 70, 70], upper_color_range=[80, 2
 tracker = MotionTracker()
 predictor = TrajectoryPredictor()
 visualizer = Visualizer()
-depth_estimator = DepthMap(baseline=0.1, focal_length=700)
 distance_estimator = SingleCameraDistanceEstimator(known_width=0.2, focal_length=800)
 
 # Initialize runtime variables
