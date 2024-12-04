@@ -1,10 +1,12 @@
 import time
+import cv2
 from camera_feed import CameraFeed
 from ball_detection import BallDetector
 from motion_tracking import MotionTracker
 from trajectory_prediction import TrajectoryPredictor
 from visualization import Visualizer
 from depth_map import DepthMap
+
 
 # Initialize components
 camera = CameraFeed(width=1200, height=720)

@@ -1,16 +1,19 @@
 import cv2
 import numpy as np
 
+
 class SingleCameraDistanceEstimator:
     def __init__(self, known_width, focal_length=None, verbose=False):
         """
         Initializes the single-camera distance estimator.
 
         Parameters:
-        - known_width: The real-world width of the object (e.g., in meters).
-        - focal_length: The focal length of the camera (in pixels). If None, it must be calibrated later.
-        - verbose: If True, prints debug information during distance estimation.
+        - known_width (float): The real-world width of the object (e.g., in meters).
+        - focal_length (float): The focal length of the camera (in pixels). If None, it must be calibrated later.
+        - verbose (bool): If True, prints debug information during distance estimation.
         """
+        if known_width <= 0:
+            raise ValueError("Known width must be a positive value.")
         self.known_width = known_width
         self.focal_length = focal_length
         self.verbose = verbose
@@ -20,27 +23,27 @@ class SingleCameraDistanceEstimator:
         Estimates the distance from the camera to the object.
 
         Parameters:
-        - bounding_box_width: The width of the object's bounding box in the image (in pixels).
+        - bounding_box_width (float): The width of the object's bounding box in the image (in pixels).
 
         Returns:
-        - distance: The estimated distance from the object to the camera (in meters), or None if invalid.
+        - float: The estimated distance from the object to the camera (in meters), or None if invalid.
         """
         if bounding_box_width <= 0:
             if self.verbose:
-                print("Invalid bounding box width. Cannot estimate distance.")
+                print("[Error] Invalid bounding box width. Cannot estimate distance.")
             return None
-        
+
         if self.focal_length is None:
             if self.verbose:
-                print("Focal length is not calibrated. Cannot estimate distance.")
+                print("[Error] Focal length is not calibrated. Cannot estimate distance.")
             return None
 
         # Estimate distance using the pinhole camera model
         distance = (self.known_width * self.focal_length) / bounding_box_width
 
         if self.verbose:
-            print(f"Bounding Box Width: {bounding_box_width} pixels")
-            print(f"Estimated Distance: {distance:.2f} meters")
+            print(f"[Info] Bounding Box Width: {bounding_box_width} pixels")
+            print(f"[Info] Estimated Distance: {distance:.2f} meters")
 
         return distance
 
@@ -49,11 +52,11 @@ class SingleCameraDistanceEstimator:
         Calibrates the focal length of the camera based on a known distance and object size.
 
         Parameters:
-        - known_distance: The real-world distance to the object (in meters).
-        - bounding_box_width: The width of the object's bounding box in the image (in pixels).
+        - known_distance (float): The real-world distance to the object (in meters).
+        - bounding_box_width (float): The width of the object's bounding box in the image (in pixels).
 
         Returns:
-        - focal_length: The calibrated focal length (in pixels).
+        - float: The calibrated focal length (in pixels).
         """
         if known_distance <= 0 or bounding_box_width <= 0:
             raise ValueError("Known distance and bounding box width must be positive values.")
@@ -61,7 +64,7 @@ class SingleCameraDistanceEstimator:
         self.focal_length = (bounding_box_width * known_distance) / self.known_width
 
         if self.verbose:
-            print(f"Calibrated Focal Length: {self.focal_length:.2f} pixels")
+            print(f"[Info] Calibrated Focal Length: {self.focal_length:.2f} pixels")
 
         return self.focal_length
 
@@ -70,11 +73,14 @@ class SingleCameraDistanceEstimator:
         Estimates distances for multiple objects.
 
         Parameters:
-        - bounding_boxes: A list of bounding box widths (in pixels).
+        - bounding_boxes (list): A list of bounding box widths (in pixels).
 
         Returns:
-        - distances: A list of estimated distances (in meters) for each object.
+        - list: A list of estimated distances (in meters) for each object.
         """
+        if not isinstance(bounding_boxes, list):
+            raise ValueError("Bounding boxes must be provided as a list of widths.")
+
         distances = []
         for box_width in bounding_boxes:
             distance = self.estimate_distance(box_width)
@@ -86,13 +92,16 @@ class SingleCameraDistanceEstimator:
         Draws the estimated distances on the frame for each detected object.
 
         Parameters:
-        - frame: The input image frame.
-        - bounding_boxes: A list of bounding box tuples (x, y, w, h).
-        - distances: A list of distances corresponding to each bounding box.
+        - frame (numpy.ndarray): The input image frame.
+        - bounding_boxes (list): A list of bounding box tuples (x, y, w, h).
+        - distances (list): A list of distances corresponding to each bounding box.
 
         Returns:
-        - frame: The frame with annotated distances.
+        - numpy.ndarray: The frame with annotated distances.
         """
+        if not isinstance(bounding_boxes, list) or not isinstance(distances, list):
+            raise ValueError("Bounding boxes and distances must be lists.")
+
         for (x, y, w, h), distance in zip(bounding_boxes, distances):
             if distance is not None:
                 cv2.putText(frame, f"{distance:.2f} m", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
@@ -104,6 +113,12 @@ class SingleCameraDistanceEstimator:
         Enables or disables verbose output.
 
         Parameters:
-        - enable: True to enable verbose mode, False to disable it.
+        - enable (bool): True to enable verbose mode, False to disable it.
         """
+        if not isinstance(enable, bool):
+            raise ValueError("Verbose mode must be set to a boolean value.")
         self.verbose = enable
+        if self.verbose:
+            print("[Info] Verbose mode enabled.")
+        else:
+            print("[Info] Verbose mode disabled.")
