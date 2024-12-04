@@ -1,22 +1,18 @@
-import cv2
 import numpy as np
 
-
 class SingleCameraDistanceEstimator:
-    def __init__(self, known_width, focal_length=None, verbose=False):
+    def __init__(self, known_width, focal_length=None):
         """
         Initializes the single-camera distance estimator.
 
         Parameters:
         - known_width (float): The real-world width of the object (e.g., in meters).
         - focal_length (float): The focal length of the camera (in pixels). If None, it must be calibrated later.
-        - verbose (bool): If True, prints debug information during distance estimation.
         """
         if known_width <= 0:
             raise ValueError("Known width must be a positive value.")
         self.known_width = known_width
         self.focal_length = focal_length
-        self.verbose = verbose
 
     def estimate_distance(self, bounding_box_width):
         """
@@ -29,21 +25,18 @@ class SingleCameraDistanceEstimator:
         - float: The estimated distance from the object to the camera (in meters), or None if invalid.
         """
         if bounding_box_width <= 0:
-            if self.verbose:
-                print("[Error] Invalid bounding box width. Cannot estimate distance.")
+            print("[Error] Invalid bounding box width. Cannot estimate distance.")
             return None
 
         if self.focal_length is None:
-            if self.verbose:
-                print("[Error] Focal length is not calibrated. Cannot estimate distance.")
+            print("[Error] Focal length is not calibrated. Cannot estimate distance.")
             return None
 
         # Estimate distance using the pinhole camera model
         distance = (self.known_width * self.focal_length) / bounding_box_width
 
-        if self.verbose:
-            print(f"[Info] Bounding Box Width: {bounding_box_width} pixels")
-            print(f"[Info] Estimated Distance: {distance:.2f} meters")
+        print(f"[Info] Bounding Box Width: {bounding_box_width} pixels")
+        print(f"[Info] Estimated Distance: {distance:.2f} meters")
 
         return distance
 
@@ -63,8 +56,7 @@ class SingleCameraDistanceEstimator:
 
         self.focal_length = (bounding_box_width * known_distance) / self.known_width
 
-        if self.verbose:
-            print(f"[Info] Calibrated Focal Length: {self.focal_length:.2f} pixels")
+        print(f"[Info] Calibrated Focal Length: {self.focal_length:.2f} pixels")
 
         return self.focal_length
 
@@ -78,9 +70,6 @@ class SingleCameraDistanceEstimator:
         Returns:
         - list: A list of estimated distances (in meters) for each object.
         """
-        if not isinstance(bounding_boxes, list):
-            raise ValueError("Bounding boxes must be provided as a list of widths.")
-
         distances = []
         for box_width in bounding_boxes:
             distance = self.estimate_distance(box_width)
@@ -99,26 +88,8 @@ class SingleCameraDistanceEstimator:
         Returns:
         - numpy.ndarray: The frame with annotated distances.
         """
-        if not isinstance(bounding_boxes, list) or not isinstance(distances, list):
-            raise ValueError("Bounding boxes and distances must be lists.")
-
         for (x, y, w, h), distance in zip(bounding_boxes, distances):
             if distance is not None:
                 cv2.putText(frame, f"{distance:.2f} m", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
         return frame
-
-    def verbose_mode(self, enable):
-        """
-        Enables or disables verbose output.
-
-        Parameters:
-        - enable (bool): True to enable verbose mode, False to disable it.
-        """
-        if not isinstance(enable, bool):
-            raise ValueError("Verbose mode must be set to a boolean value.")
-        self.verbose = enable
-        if self.verbose:
-            print("[Info] Verbose mode enabled.")
-        else:
-            print("[Info] Verbose mode disabled.")

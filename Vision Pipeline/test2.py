@@ -5,7 +5,7 @@ from ball_detection_test import BallDetector
 from motion_tracking_test import MotionTracker
 from trajectory_prediction_test import TrajectoryPredictor
 from visualization_test import Visualizer
-from depth_map import DepthMap
+from depth_map_test import DepthMap
 from single_camera_distance_test import SingleCameraDistanceEstimator
 
 # Initialize components
@@ -28,7 +28,7 @@ try:
         frame = camera.get_frame()
 
         # Step 2: Detect the ball in the frame
-        result = detector.detect_ball(frame)  # Safely get the result
+        result = detector.detect_ball(frame)
         if result is not None:
             center, bounding_box = result
         else:
